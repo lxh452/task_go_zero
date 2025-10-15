@@ -28,7 +28,43 @@ func NewTaskListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *TaskList
 }
 
 func (l *TaskListLogic) TaskList(req *types.PageReq) (resp *types.TaskListResp, err error) {
-	// todo: add your logic here and delete this line
+	// 1. 查询任务列表
+	tasks, err := l.svcCtx.TaskModel.FindAll(l.ctx, req.Page, req.Size)
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	// 2. 转换为响应格式
+	var taskList []types.Task
+	for _, task := range tasks {
+		taskList = append(taskList, types.Task{
+			Id:                   task.Id,
+			Company_id:           task.CompanyId,
+			Department_id:        task.DepartmentId,
+			Responsible_user_ids: task.ResponsibleUserIds,
+			Node_user_ids:        task.NodeUserIds,
+			Node_key:             task.NodeKey,
+			Title:                task.Title,
+			Description:          task.Description,
+			Attachment_url:       task.AttachmentUrl,
+			Status:               task.Status,
+			Created_at:           task.CreatedAt.String(),
+			Updated_at:           task.UpdatedAt.String(),
+		})
+	}
+
+	// 3. 发布查询事件到MQ
+	l.svcCtx.MQ.Publish(l.ctx, "task.list_queried", map[string]interface{}{
+		"page":      req.Page,
+		"size":      req.Size,
+		"count":     len(taskList),
+		"queried_at": time.Now(),
+	})
+
+	return &types.TaskListResp{
+		List:  taskList,
+		Total: int64(len(taskList)),
+		Page:  req.Page,
+		Size:  req.Size,
+	}, nil
 }

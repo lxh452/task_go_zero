@@ -28,7 +28,43 @@ func NewUserListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserList
 }
 
 func (l *UserListLogic) UserList(req *types.PageReq) (resp *types.UserListResp, err error) {
-	// todo: add your logic here and delete this line
+	// 1. 查询用户列表
+	users, err := l.svcCtx.UserAccountModel.FindAll(l.ctx, req.Page, req.Size)
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	// 2. 转换为响应格式
+	var userList []types.UserAccount
+	for _, user := range users {
+		userList = append(userList, types.UserAccount{
+			Id:            user.Id,
+			Company_id:    user.CompanyId,
+			Department_id: user.DepartmentId,
+			Account:       user.Account,
+			Name:          user.Name,
+			Email:         user.Email,
+			Role_tags:     user.RoleTags,
+			Status:        user.Status,
+			Hired_at:      user.HiredAt.String(),
+			Left_at:       user.LeftAt.String(),
+			Created_at:    user.CreatedAt.String(),
+			Updated_at:    user.UpdatedAt.String(),
+		})
+	}
+
+	// 3. 发布查询事件到MQ
+	l.svcCtx.MQ.Publish(l.ctx, "user.list_queried", map[string]interface{}{
+		"page":      req.Page,
+		"size":      req.Size,
+		"count":     len(userList),
+		"queried_at": time.Now(),
+	})
+
+	return &types.UserListResp{
+		List:  userList,
+		Total: int64(len(userList)),
+		Page:  req.Page,
+		Size:  req.Size,
+	}, nil
 }
