@@ -1,0 +1,569 @@
+syntax = "v1"
+
+type Empty {}
+
+// 基础类型
+type IdReq {
+	id int64
+}
+
+type PageReq {
+	page int64
+	size int64
+}
+
+type OkResp {
+	ok bool
+}
+
+// 企业
+type Company {
+	id         int64
+	name       string
+	domain     string
+	status     int64
+	created_at string
+	updated_at string
+}
+
+type CompanyCreateReq {
+	name   string
+	domain string
+}
+
+type CompanyUpdateReq {
+	id     int64
+	name   string
+	domain string
+	status int64
+}
+
+type CompanyListResp {
+	list  []Company
+	total int64
+}
+
+// 部门
+type Department {
+	id         int64
+	company_id int64
+	name       string
+	parent_id  int64
+	status     int64
+	created_at string
+	updated_at string
+}
+
+type DepartmentCreateReq {
+	company_id int64
+	name       string
+	parent_id  int64
+}
+
+type DepartmentUpdateReq {
+	id         int64
+	company_id int64
+	name       string
+	parent_id  int64
+	status     int64
+}
+
+type DepartmentListResp {
+	list  []Department
+	total int64
+}
+
+// 用户（业务档案）
+type UserAccount {
+	id            int64
+	company_id    int64
+	department_id int64
+	account       string
+	name          string
+	email         string
+	role_tags     []string
+	status        int64
+	hired_at      string
+	left_at       string
+	created_at    string
+	updated_at    string
+}
+
+type UserCreateReq {
+	company_id    int64
+	department_id int64
+	account       string
+	name          string
+	email         string
+	role_tags     []string
+}
+
+type UserUpdateReq {
+	id            int64
+	department_id int64
+	name          string
+	email         string
+	role_tags     []string
+	status        int64
+}
+
+type UserResignReq {
+	id      int64
+	left_at string
+	reason  string
+}
+
+type UserListResp {
+	list  []UserAccount
+	total int64
+}
+
+// 登录认证
+type LoginReq {
+	account  string
+	password string
+}
+
+type LoginResp {
+	token string
+	user  UserAccount
+}
+
+type RegisterReq {
+	company_id    int64
+	department_id int64
+	account       string
+	name          string
+	email         string
+	password      string
+}
+
+type CompanyJoinReq {
+	company_id    int64
+	department_id int64
+	account       string
+	name          string
+	email         string
+	password      string
+}
+
+type CompanyJoinApprovalReq {
+	join_user_id int64
+	approve      bool
+	reason       string
+}
+
+// 任务
+type Task {
+	id                   int64
+	company_id           int64
+	department_id        int64
+	title                string
+	description          string
+	attachments_url      string
+	owner_user_ids       []int64
+	node_user_ids        []int64
+	flow_assignees       map[string][]int64
+	priority             int64
+	start_date           string
+	due_date             string
+	schedule_granularity string
+	status               int64
+	handover_required    bool
+	created_by           int64
+	created_at           string
+	updated_at           string
+}
+
+type TaskCreateReq {
+	company_id           int64
+	department_id        int64
+	title                string
+	description          string
+	attachments_url      string
+	owner_user_ids       []int64
+	node_user_ids        []int64
+	flow_assignees       map[string][]int64
+	priority             int64
+	start_date           string
+	due_date             string
+	schedule_granularity string
+}
+
+type TaskUpdateReq {
+	id             int64
+	title          string
+	description    string
+	owner_user_ids []int64
+	node_user_ids  []int64
+	flow_assignees map[string][]int64
+	priority       int64
+	status         int64
+}
+
+type TaskListResp {
+	list  []Task
+	total int64
+}
+
+// 用户任务明细
+type UserTaskLog {
+	id                    int64
+	company_id            int64
+	task_id               int64
+	node_key              string
+	user_id               int64
+	collaborator_user_ids []int64
+	progress_percent      int64
+	report_note           string
+	status                int64
+	deadline_at           string
+	handover_id           int64
+	is_active             bool
+	created_at            string
+	updated_at            string
+}
+
+type LogCreateReq {
+	company_id            int64
+	task_id               int64
+	node_key              string
+	user_id               int64
+	collaborator_user_ids []int64
+	progress_percent      int64
+	report_note           string
+	status                int64
+	deadline_at           string
+}
+
+type LogUpdateReq {
+	id                    int64
+	collaborator_user_ids []int64
+	progress_percent      int64
+	report_note           string
+	status                int64
+	deadline_at           string
+	is_active             bool
+}
+
+type LogListResp {
+	list  []UserTaskLog
+	total int64
+}
+
+// 排期、派发、交接
+type ScheduleQueryReq {
+	user_id       int64
+	company_id    int64
+	department_id int64
+	granularity   string
+	start         string
+	end           string
+}
+
+type DispatchReq {
+	task_id         int64
+	node_key        string
+	required_tags   []string
+	prefer_user_ids []int64
+}
+
+type HandoverReq {
+	from_user_id int64
+	to_user_id   int64
+	task_id      int64
+	node_key     string
+	reason       string
+	when         string
+}
+
+type ActionResp {
+	success bool
+	message string
+}
+
+// 自动派发 - 候选与确认
+type DispatchPreviewReq {
+	task_id        int64
+	node_key       string
+	required_tags  []string
+	max_candidates int64
+}
+
+type Candidate {
+	user_id   int64
+	score     int64
+	reasons   []string
+	conflicts []string
+}
+
+type DispatchPreviewResp {
+	candidates []Candidate
+}
+
+type DispatchConfirmReq {
+	task_id           int64
+	node_key          string
+	assignee_user_ids []int64
+}
+
+// 交接提议/同意/拒绝
+type HandoverProposeReq {
+	from_user_id int64
+	to_user_id   int64
+	task_id      int64
+	node_key     string
+	reason       string
+}
+
+type HandoverActionReq {
+	handover_id int64
+	comment     string
+}
+
+type HandoverItem {
+	id           int64
+	task_id      int64
+	node_key     string
+	from_user_id int64
+	to_user_id   int64
+	status       string
+	created_at   string
+}
+
+type HandoverListResp {
+	list  []HandoverItem
+	total int64
+}
+
+// 提醒与通知
+type Notification {
+	id         int64
+	category   string
+	title      string
+	content    string
+	user_id    int64
+	read       bool
+	created_at string
+}
+
+type NotificationListResp {
+	list  []Notification
+	total int64
+}
+
+type NotificationAckReq {
+	id int64
+}
+
+// company group
+@server (
+	group:  company
+	prefix: /api/v1/company
+	jwt:    true
+)
+service task_project-api {
+	@doc "创建企业"
+	@handler CompanyCreate
+	post / (CompanyCreateReq) returns (Company)
+
+	@doc "修改企业信息/状态"
+	@handler CompanyUpdate
+	put / (CompanyUpdateReq) returns (Company)
+
+	@doc "注销企业"
+	@handler CompanyCancel
+	delete / (IdReq) returns (ActionResp)
+
+	@doc "企业列表"
+	@handler CompanyList
+	get /list (PageReq) returns (CompanyListResp)
+}
+
+// department group
+@server (
+	group:  department
+	prefix: /api/v1/department
+	jwt:    true
+)
+service task_project-api {
+	@doc "创建部门"
+	@handler DepartmentCreate
+	post / (DepartmentCreateReq) returns (Department)
+
+	@doc "修改部门"
+	@handler DepartmentUpdate
+	put / (DepartmentUpdateReq) returns (Department)
+
+	@doc "删除部门"
+	@handler DepartmentDelete
+	delete / (IdReq) returns (ActionResp)
+
+	@doc "部门列表"
+	@handler DepartmentList
+	get /list (PageReq) returns (DepartmentListResp)
+}
+
+// user group
+@server (
+	group:  user
+	prefix: /api/v1/user
+	jwt:    true
+)
+service task_project-api {
+	@doc "创建用户档案"
+	@handler UserCreate
+	post / (UserCreateReq) returns (UserAccount)
+
+	@doc "更新用户档案"
+	@handler UserUpdate
+	put / (UserUpdateReq) returns (UserAccount)
+
+	@doc "删除用户"
+	@handler UserDelete
+	delete / (IdReq) returns (ActionResp)
+
+	@doc "用户离职"
+	@handler UserResign
+	post /resign (UserResignReq) returns (ActionResp)
+
+	@doc "用户档案列表"
+	@handler UserList
+	get /list (PageReq) returns (UserListResp)
+}
+
+// auth group (public)
+@server (
+	group:  auth
+	prefix: /api/v1/auth
+)
+service task_project-api {
+	@doc "注册并创建账号"
+	@handler Register
+	post /register (RegisterReq) returns (UserAccount)
+
+	@doc "申请加入企业"
+	@handler CompanyJoin
+	post /joinCompany (CompanyJoinReq) returns (ActionResp)
+
+	@doc "审批加入企业申请"
+	@handler CompanyJoinApproval
+	post /joinCompany/approval (CompanyJoinApprovalReq) returns (ActionResp)
+
+	@doc "用户登录"
+	@handler Login
+	post /login (LoginReq) returns (LoginResp)
+}
+
+// task group
+@server (
+	group:  task
+	prefix: /api/v1/task
+	jwt:    true
+)
+service task_project-api {
+	@doc "创建任务"
+	@handler TaskCreate
+	post / (TaskCreateReq) returns (Task)
+
+	@doc "更新任务"
+	@handler TaskUpdate
+	put / (TaskUpdateReq) returns (Task)
+
+	@doc "任务列表"
+	@handler TaskList
+	get /list (PageReq) returns (TaskListResp)
+
+	@doc "新增任务明细/日报"
+	@handler LogCreate
+	post /log (LogCreateReq) returns (UserTaskLog)
+
+	@doc "更新任务明细/进度"
+	@handler LogUpdate
+	put /log (LogUpdateReq) returns (UserTaskLog)
+
+	@doc "任务明细列表"
+	@handler LogList
+	get /log/list (PageReq) returns (LogListResp)
+}
+
+// schedule group
+@server (
+	group:  schedule
+	prefix: /api/v1/schedule
+	jwt:    true
+)
+service task_project-api {
+	@doc "查询任务排期"
+	@handler ScheduleQuery
+	get / (ScheduleQueryReq) returns (LogListResp)
+}
+
+// dispatch group
+@server (
+	group:  dispatch
+	prefix: /api/v1/dispatch
+	jwt:    true
+)
+service task_project-api {
+	@doc "自动派发执行"
+	@handler Dispatch
+	post / (DispatchReq) returns (ActionResp)
+
+	@doc "自动派发候选预览"
+	@handler DispatchPreview
+	post /preview (DispatchPreviewReq) returns (DispatchPreviewResp)
+
+	@doc "确认派发结果"
+	@handler DispatchConfirm
+	post /confirm (DispatchConfirmReq) returns (ActionResp)
+}
+
+// handover group
+@server (
+	group:  handover
+	prefix: /api/v1/handover
+	jwt:    true
+)
+service task_project-api {
+	@doc "直接交接（即时生效）"
+	@handler Handover
+	post / (HandoverReq) returns (ActionResp)
+
+	@doc "发起交接提议"
+	@handler HandoverPropose
+	post /propose (HandoverProposeReq) returns (ActionResp)
+
+	@doc "同意交接"
+	@handler HandoverAccept
+	post /accept (HandoverActionReq) returns (ActionResp)
+
+	@doc "拒绝交接"
+	@handler HandoverReject
+	post /reject (HandoverActionReq) returns (ActionResp)
+
+	@doc "交接记录列表"
+	@handler HandoverList
+	get /list (PageReq) returns (HandoverListResp)
+}
+
+// notification group
+@server (
+	group:  notification
+	prefix: /api/v1/notification
+	jwt:    true
+)
+service task_project-api {
+	@doc "通知列表"
+	@handler NotificationList
+	get /list (PageReq) returns (NotificationListResp)
+
+	@doc "通知已读确认"
+	@handler NotificationAck
+	post /ack (NotificationAckReq) returns (ActionResp)
+
+	@doc "触发到期提醒"
+	@handler TriggerDueReminders
+	post /triggerDue (Empty) returns (ActionResp)
+}
+

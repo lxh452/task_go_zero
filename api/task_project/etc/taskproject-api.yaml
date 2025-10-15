@@ -1,0 +1,24 @@
+Name: task_project-api
+Host: 0.0.0.0
+Port: 8888
+Auth:
+  AccessSecret: An_irresponsible_and_foolish_mentor_yfzhou
+  AccessExpire: 86400
+MySQL:
+  DataSource: root:123456@tcp(127.0.0.1:3306)/task_project?charset=utf8mb4&parseTime=true&loc=Local
+Redis:
+  Host: 127.0.0.1:6379
+  Type: node
+  Pass: ""
+  Db: 0
+RabbitMQ:
+  Url: amqp://guest:guest@localhost:5672/
+  Exchange: task.events
+  Queue: task.queue
+  RoutingKey: task.key
+SMTP:
+  Host: smtp.example.com
+  Port: 587
+  Username: no-reply@example.com
+  Password: yourpassword
+  From: Task System <no-reply@example.com>
