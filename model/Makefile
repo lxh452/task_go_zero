@@ -1,11 +1,29 @@
+# 按照依赖顺序排列：基础表 -> 业务表 -> 功能表
+all: user company role user_auth task
 
-.PHONY: gen-mysql-all-model install-goctl
+# 基础表（无依赖）
+user:
+	goctl model mysql ddl -src="./sql/user.sql" -dir="./user"
 
-gen-mysql-all-model:
-	goctl model mysql ddl --src "./sql/core.sql" --dir "./core" --style "go-zero"
+# 业务表（依赖user）
+company:
+	goctl model mysql ddl -src="./sql/company.sql" -dir="./company"
 
-# 安装 goctl 工具
-install-goctl:
-	go install github.com/zeromicro/go-zero/tools/goctl@latest
+# 权限表（依赖company和user）
+role:
+	goctl model mysql ddl -src="./sql/role.sql" -dir="./role"
 
+# 功能表（依赖user）
+user_auth:
+	goctl model mysql ddl -src="./sql/user_auth.sql" -dir="./user_auth"
 
+# 任务表（依赖company和user）
+task:
+	goctl model mysql ddl -src="./sql/task.sql" -dir="./task"
+
+# 清理生成的文件
+clean:
+	rm -rf ./user ./company ./role ./user_auth ./task
+
+# 重新生成所有表
+rebuild: clean all
